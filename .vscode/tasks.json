@@ -7,8 +7,11 @@
             "type": "shell",
             "label": "g++.exe build active file",
             
-            "command": "g++",
+            "command": "cd",
             "args": [
+                "${fileDirname}",
+                "&&",
+                "g++",
                 "*.cpp",
                 "-o",
                 "fil.exe",
