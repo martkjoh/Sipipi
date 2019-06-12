@@ -6,19 +6,35 @@
         {
             "type": "shell",
             "label": "g++.exe build active file",
-            
-            "command": "cd",
-            "args": [
-                "${fileDirname}",
-                "&&",
-                "g++",
-                "*.cpp",
-                "-o",
-                "fil.exe",
-                "&&",
-                "fil.exe",
-    
-            ],
+            "windows":
+            {
+                "command": "cd",
+                "args": [
+                    "${fileDirname}",
+                    "&&",
+                    "g++",
+                    "*.cpp",
+                    "-o",
+                    "fil.exe",
+                    "&&",
+                    "fil.exe",
+        
+                ],
+            },
+            "linux":
+            {
+                "command": "cd",
+                "args": [
+                    "${fileDirname}",
+                    "&&",
+                    "g++",
+                    "*.cpp",
+                    "-o",
+                    "fil",
+                    "&&",
+                    "./fil",
+                ]
+            },
             "problemMatcher": [
                 "$gcc"
             ],

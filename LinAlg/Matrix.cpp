@@ -55,7 +55,6 @@ Matrix Matrix::operator-=(Matrix rhs)
     return (*this) += -rhs;
 }
 
-
 Matrix Matrix::operator- ()
 {
     for (int i = 0; i < size(); i++)
@@ -70,7 +69,6 @@ Matrix Matrix::operator= (Matrix rhs)
     swap(rhs.data, data);
     return *this;
 }
-
 
 void Matrix::print()
 {
@@ -120,13 +118,11 @@ Matrix Matrix::T() const
 }
 
 
-
 // Opperators to use on Matrices
 
 Matrix operator* (Matrix lhs, const Matrix &rhs) {return lhs *= rhs;}
 Matrix operator+ (Matrix lhs, const Matrix &rhs) {return lhs += rhs;}
 Matrix operator- (Matrix lhs, const Matrix &rhs) {return lhs -= rhs;}
-
 
 
 // Helper functions for matrices
