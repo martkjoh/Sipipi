@@ -1,25 +1,11 @@
-#include <Magick++.h>
-#include <iostream>
-
-using namespace std;
-using namespace Magick;
+#include "Kernel.h"
 
 int main()
 {   
-    int n = 500;
-    Image test(Geometry(n, n), "white");
-
-    Pixels pxCache(test);
-    Quantum* px;
-    px = pxCache.get(0, 0, n, n);
-    float a;
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-        {
-            a = (i * j) / (n * n * 1.);
-            test.pixelColor(i, j, ColorRGB(a, a / 2, 1 - a));
-        }
-
-    test.write("hello_world.png");
+    Image im("blomst.jpeg");
+    im.pixelColor(3, 3, "black");
+    Gaussian g;
+    g.apply(im);
+    im.write("hehe.jpeg");
     return 0;
 }
