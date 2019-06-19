@@ -1,4 +1,31 @@
 #include "Kernel.h"
+#include <cmath>
+
+using namespace std;
+
+Kernel::Kernel(int m, int n) : m{m}, n{n}, vals(new float[m * n]) 
+{
+    for (int i = 0; i < m; i++)
+        for(int j = 0; j < n; j++)
+            set(i, j, f(i, j));
+}
+
+void Kernel::fillKernel(Kernel * k)
+{
+    float s = 0;
+    float a = 0;
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+        {
+            a = k->f(i, j);
+            s += a;
+            set(i, j, a);
+        }
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+            set(i, j, get(i, j) / s);
+
+}
 
 void Kernel::apply(Image& im)
 {
@@ -12,7 +39,7 @@ void Kernel::apply(Image& im)
             for (int k = 0; k < m; k++)
                 for(int l = 0; l < n; l++)
                 {
-                    b = im.pixelColor(i + k - (m - 1) / 2, j + l - (n - 1) / 2);
+                    b = im.pixelColor(i + k - (m - m%2) / 2, j + l - (n - n%2) / 2);
                     a.red(a.red() + b.red() * get(k, l));
                     a.green(a.green() + b.green() * get(k, l));
                     a.blue(a.blue() + b.blue() * get(k, l));
@@ -22,39 +49,20 @@ void Kernel::apply(Image& im)
     }
 }
 
-Kernel::Kernel(int m, int n) : m{m}, n{n}, vals(new float[m * n]) {}
-
-void Kernel::set(float* v)
+float Kernel::f(float x, float y)
 {
-    for (int i = 0; i < m * n; i++)
-        vals[i] = v[i];
+    if (x == (m - 1) / 2 && y == (n - 1) / 2) return 1;
+    else return 0;
 }
 
 
-// Gaussian::Gaussian() : Kernel(3, 3)
-// {
-//     float v [] = {
-//         1 / 16., 2 / 16., 1 / 16.,
-//         2 / 16., 4 / 16., 2 / 16.,
-//         1 / 16., 2 / 16., 1 / 16.};
-
-//     set(v);
-// }
-
-
-Gaussian::Gaussian() : Kernel (5, 5)
+float Gaussian::f(float x, float y)
 {
-    float v [] = {
-        1 / 273.,   4 / 273.,    7 / 273.,   4 / 273.,  1 / 273.,
-
-        4 / 273.,   16 / 273.,   26 / 273.,  16 / 273., 4 / 273.,
-
-        7 / 273.,   26 / 273.,   41 / 273.,  26 / 273., 7 / 273.,
-
-        4 / 273.,   16 / 273.,   26 / 273.,  16 / 273., 4 / 273.,
-
-        1 / 273.,   4 / 273.,    7 / 273.,   4 / 273.,  1 / 273.,};
+    return 1 / sqrt(2 * M_PI) * exp(-pow((x + y - (n - n%2)), 2) / 2);
+}
 
 
-    set(v);
+float CircleBlur::f(float x, float y)
+{
+    return sqrt(pow((x - (m - m%2)), 2) + pow((y - (n - n%2)), 2));
 }
