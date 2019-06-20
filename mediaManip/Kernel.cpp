@@ -3,66 +3,99 @@
 
 using namespace std;
 
-Kernel::Kernel(int m, int n) : m{m}, n{n}, vals(new float[m * n]) 
+Kernel::Kernel(int m, int n) : m{m}, n{n}, vals(new float[(2*m+1) * (2*n+1)]) 
 {
-    for (int i = 0; i < m; i++)
-        for(int j = 0; j < n; j++)
-            set(i, j, f(i, j));
+    for (int i = 0; i < rows(); i++)
+        for (int j = 0; j < columns(); j++)
+            set(i, j, f(xCoord(i), yCoord(j)));
 }
 
 void Kernel::fillKernel(Kernel * k)
 {
     float s = 0;
     float a = 0;
-    for (int i = 0; i < m; i++)
-        for (int j = 0; j < n; j++)
+    for (int i = 0; i < rows(); i++)
+        for (int j = 0; j < columns(); j++)
         {
-            a = k->f(i, j);
+            a = k->f(xCoord(i), yCoord(j));
             s += a;
             set(i, j, a);
         }
-    for (int i = 0; i < m; i++)
-        for (int j = 0; j < n; j++)
-            set(i, j, get(i, j) / s);
 
+    for (int i = 0; i < rows(); i++)
+        for (int j = 0; j < columns(); j++)
+        if (s != 0)
+            set(i, j, get(i, j) / s);
 }
 
-void Kernel::apply(Image& im)
+Image Kernel::apply(Image& im)
 {
     im.quantizeColorSpace( RGBColorspace );
-    for (int i = 1; i < im.columns() - 1; i++)
+    Image im2(im);
+    for (int i = 1; i < im.rows() - 1; i++)
     {
-        for (int j = 1; j < im.rows() - 1; j++)
+        for (int j = 1; j < im.columns() - 1; j++)
         {
+
+        // Color of new pizel
         ColorRGB a(0, 0, 0);
+        // Color of old pixel
         ColorRGB b;
-            for (int k = 0; k < m; k++)
-                for(int l = 0; l < n; l++)
+            for (int k = 0; k < rows(); k++)
+                for(int l = 0; l < columns(); l++)
                 {
-                    b = im.pixelColor(i + k - (m - m%2) / 2, j + l - (n - n%2) / 2);
-                    a.red(a.red() + b.red() * get(k, l));
-                    a.green(a.green() + b.green() * get(k, l));
-                    a.blue(a.blue() + b.blue() * get(k, l));
+                    b = im.pixelColor(j + xCoord(l), i + yCoord(k));
+                    a.red(a.red() + b.red() * get(l, k));
+                    a.green(a.green() + b.green() * get(l, k));
+                    a.blue(a.blue() + b.blue() * get(l, k));
                 }
-        im.pixelColor(i, j, a);
+        im2.pixelColor(j, i, a);
         }
+    }
+    return im2;
+}
+
+void Kernel::print()
+{
+    for (int i = 0; i < columns(); i++)
+    {
+        for(int j = 0; j < rows(); j++)
+        cout << vals[i * columns() + j] << "     ";
+    cout << endl;
     }
 }
 
 float Kernel::f(float x, float y)
 {
-    if (x == (m - 1) / 2 && y == (n - 1) / 2) return 1;
+    if (x == 0 && y == 0)  return 1;
     else return 0;
 }
 
-
 float Gaussian::f(float x, float y)
 {
-    return 1 / sqrt(2 * M_PI) * exp(-pow((x + y - (n - n%2)), 2) / 2);
+    return 1 / sqrt(2 * M_PI) / s * exp(-(x*x + y*y) / (2*s*s));
 }
 
 
-float CircleBlur::f(float x, float y)
+float Edge::f(float x, float y)
 {
-    return sqrt(pow((x - (m - m%2)), 2) + pow((y - (n - n%2)), 2));
+    if (x == 0 && y == 0) return rows() * columns() - 1;
+    else return -1;
+}
+
+float Sharpen::f(float x, float y)
+{
+    if (x == 1 && y == 1) return 5;
+    if ((x == 0 && y == 0) ||
+        (x == 0 && y == 2) ||
+        (x == 2 && y == 0) ||
+        (x == 2 && y == 2))
+        return -1;
+    else return 0;
+}
+
+float Smear::f(float x, float y)
+{
+    return 1 / sqrt(2 * M_PI) / s 
+    * exp(-(x*x) / (2*s*s));
 }

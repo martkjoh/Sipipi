@@ -7,15 +7,18 @@ int main()
 {   
     Image im("blomst.jpeg");
 
-    int n = 5;
-    CircleBlur g(n);
-    g.apply(im);
-    for (int i = 0; i < n; i++)
-        {
-        for (int j = 0; j < n; j++)
-            cout << g.get(i, j) << "     ";
-        cout << endl;
-        }
+    // Gaussian g(1, 1);
+    // g.print();
+    // im = g.apply(im);
+
+    // Edge e(1);
+    // e.print();
+    // im = e.apply(im);
+    // Sharpen s(3);
+    // im = s.apply(im);
+    Smear s(3, 10);
+    s.print();
+    im = s.apply(im);   
 
     im.write("hehe.jpeg");
     return 0;
