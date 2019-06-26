@@ -8,69 +8,82 @@ using namespace std;
 class Kernel
 {
     private:
-        float* vals;
         // The kernel will have size 2m+1 x 2n+1
         int m, n;
 
     protected:
-        virtual float f(float x, float y);
-        void fillKernel(Kernel * k);
-        float get(int x, int y) {return vals[x + y*rows()];}
-        void set(int x, int y, float v) {vals[x + y*rows()] = v;}
-
+        // The (x,y) coords are for the kernel, the (p,q) coords are for the picture
+        virtual float f(float x, float y, float p = 0, float q = 0);
+        virtual float get(int x, int y, float p = 0, float q = 0) {return f(x, y, p, q);}
 
     public:
-        Kernel() {};
-        Kernel(int m, int n);
-        ~Kernel() {delete[] vals;}
+        Kernel();
+        Kernel(int m, int n) : m{m}, n{n} {}
 
         int columns() {return 2*m + 1;}
         int rows() {return 2*n + 1;}
         // Sets origo in the center insted of top left corner
         int yCoord(int y) {return y - m;}
         int xCoord(int x) {return x - n;}
-        void print();
-
-        Image apply(Image& im);
+        
+        Image apply(Image& im, Kernel * ker);
 };
 
-class Gaussian : public Kernel
+class StaticKernel : public Kernel
+{
+    private:
+        float* vals;
+
+    protected:
+        virtual float f(float x, float y, float p = 0, float q = 0) {return 0;}
+        void fillKernel(Kernel * k);
+        float get(int x, int y, float p, float q) {return vals[x + y*rows()];}
+        void set(int x, int y, float v) {vals[x + y*rows()] = v;}
+
+    public:
+        ~StaticKernel() {delete[] vals;}
+        StaticKernel(int m, int n, Kernel * k) : Kernel(m, n) {fillKernel(k);}
+
+        void print();
+};
+
+class Gaussian : public StaticKernel
 {
     private:
         float f(float x, float y);
         float s;
 
     public:
-        Gaussian(int n, float s = 1) :s{s}, Kernel(n, n) {fillKernel(this);}
+        Gaussian(int n, float s = 1) :s{s}, StaticKernel(n, n, this) {}
 };
 
 
-class Edge : public Kernel
-{
-    private: 
-        float f(float x, float y);
+// class Edge : public StaticKernel
+// {
+//     private: 
+//         float f(float x, float y);
 
-    public:
-        Edge(int n) : Kernel(n, n) {fillKernel(this);}
-};
+//     public:
+//         Edge(int n) : StaticKernel(n, n, this) {}
+// };
 
-class Sharpen : public Kernel
-{
-    private: 
-        float f(float x, float y);
+// class Sharpen : public StaitcKernel
+// {
+//     private: 
+//         float f(float x, float y);
 
-    public:
-        Sharpen(int n) : Kernel(3, 3) {fillKernel(this);}
-};
+//     public:
+//         Sharpen(int n) :  StaticKernel(3, 3, this) {}
+// };
 
 
-// TODO: fix this 
+// // TODO: fix this 
 
-class Smear : public Kernel
-{
-    private: 
-        float f(float x, float y);
-        float s;
-    public:
-        Smear(int n, float s = 1) : s{s}, Kernel(0, n) {fillKernel(this);}
-};
+// class Smear : public StaticKernel
+// {
+//     private: 
+//         float f(float x, float y);
+//         float s;
+//     public:
+//         Smear(int n, float s = 1) : s{s},  StaticKernel(0, n, this) {}
+// };
