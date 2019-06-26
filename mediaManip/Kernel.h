@@ -11,13 +11,11 @@ class Kernel
         // The kernel will have size 2m+1 x 2n+1
         int m, n;
 
-    protected:
+    public:
         // The (x,y) coords are for the kernel, the (p,q) coords are for the picture
-        virtual float f(float x, float y, float p = 0, float q = 0);
+        virtual float f(float x, float y, float p = 0, float q = 0) {return 0;};
         virtual float get(int x, int y, float p = 0, float q = 0) {return f(x, y, p, q);}
 
-    public:
-        Kernel();
         Kernel(int m, int n) : m{m}, n{n} {}
 
         int columns() {return 2*m + 1;}
@@ -27,6 +25,8 @@ class Kernel
         int xCoord(int x) {return x - n;}
         
         Image apply(Image& im, Kernel * ker);
+
+        virtual void test() {cout << "Helt øverst";}
 };
 
 class StaticKernel : public Kernel
@@ -35,28 +35,31 @@ class StaticKernel : public Kernel
         float* vals;
 
     protected:
-        virtual float f(float x, float y, float p = 0, float q = 0) {return 0;}
-        void fillKernel(Kernel * k);
-        float get(int x, int y, float p, float q) {return vals[x + y*rows()];}
+        virtual float f(float x, float y) {return 1;}
+        float get(int x, int y, float p = 0, float q = 0) {return vals[x + y*rows()];}
         void set(int x, int y, float v) {vals[x + y*rows()] = v;}
 
-    public:
-        ~StaticKernel() {delete[] vals;}
-        StaticKernel(int m, int n, Kernel * k) : Kernel(m, n) {fillKernel(k);}
+        void fillKernel(Kernel * k);
 
+    public:
+        StaticKernel(int m, int n, Kernel * k) : Kernel(m, n) {fillKernel(k); cout << typeid(*this).name() << endl;}
+        ~StaticKernel() {delete[] vals;}
+
+        virtual void test() {cout << "Basis" << endl;}
         void print();
 };
 
 class Gaussian : public StaticKernel
 {
     private:
-        float f(float x, float y);
         float s;
+        float f(float x, float y) 
+            {return 1 / sqrt(2 * M_PI) / s * exp(-(x*x + y*y) / (2*s*s));}
 
     public:
-        Gaussian(int n, float s = 1) :s{s}, StaticKernel(n, n, this) {}
+        void test() override {cout << "Derived" << endl;}
+        Gaussian(int n, float s = 1) : s{s}, StaticKernel(n, n, this) {cout << typeid(*this).name() << endl;}
 };
-
 
 // class Edge : public StaticKernel
 // {
@@ -67,7 +70,7 @@ class Gaussian : public StaticKernel
 //         Edge(int n) : StaticKernel(n, n, this) {}
 // };
 
-// class Sharpen : public StaitcKernel
+// class Sharpen : public StaticKernel
 // {
 //     private: 
 //         float f(float x, float y);

@@ -24,21 +24,13 @@ Image Kernel::apply(Image& im, Kernel * ker)
                     a.green(a.green() + b.green() * ker->get(l, k));
                     a.blue(a.blue() + b.blue() * ker->get(l, k));
                 }
+
         im2.pixelColor(j, i, a);
         }
     }
     return im2;
 }
 
-void StaticKernel::print()
-{
-    for (int i = 0; i < columns(); i++)
-    {
-        for(int j = 0; j < rows(); j++)
-        cout << vals[i * columns() + j] << "     ";
-    cout << endl;
-    }
-}
 
 void StaticKernel::fillKernel(Kernel * k)
 {
@@ -47,7 +39,7 @@ void StaticKernel::fillKernel(Kernel * k)
     for (int i = 0; i < rows(); i++)
         for (int j = 0; j < columns(); j++)
         {
-            a = k->f(xCoord(i), yCoord(j));
+            a = k->f(j, i);
             s += a;
             set(i, j, a);
         }
@@ -58,10 +50,14 @@ void StaticKernel::fillKernel(Kernel * k)
             set(i, j, get(i, j) / s);
 }
 
-
-float Gaussian::f(float x, float y)
+void StaticKernel::print()
 {
-    return 1 / sqrt(2 * M_PI) / s * exp(-(x*x + y*y) / (2*s*s));
+    for (int i = 0; i < columns(); i++)
+    {
+        for(int j = 0; j < rows(); j++)
+        cout << vals[i * columns() + j] << "     ";
+    cout << endl;
+    }
 }
 
 

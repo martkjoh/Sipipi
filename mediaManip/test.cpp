@@ -7,7 +7,7 @@ int main()
 {   
     Image im("blomst.jpeg");
 
-    Gaussian g(1, 1);
+    Gaussian g(1);
     g.print();
     im = g.apply(im, &g);
 
@@ -19,7 +19,7 @@ int main()
     // Smear s(3, 10);
     // s.print();
     // im = s.apply(im);   
-
+    
     im.write("hehe.jpeg");
     return 0;
 }
