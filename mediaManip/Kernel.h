@@ -24,9 +24,7 @@ class Kernel
         int yCoord(int y) {return y - m;}
         int xCoord(int x) {return x - n;}
         
-        Image apply(Image& im, Kernel * ker);
-
-        virtual void test() {cout << "Helt øverst";}
+        Image apply(Image& im);
 };
 
 class StaticKernel : public Kernel
@@ -35,14 +33,15 @@ class StaticKernel : public Kernel
         float* vals;
 
     protected:
-        virtual float f(float x, float y) {return 1;}
-        float get(int x, int y, float p = 0, float q = 0) {return vals[x + y*rows()];}
-        void set(int x, int y, float v) {vals[x + y*rows()] = v;}
+        virtual float f(float x, float y) 
+            {if (x == 0 && y == 0) return 1; else return 0;}
+        float get(int x, int y, float p = 0, float q = 0) {return vals[x + y * rows()];}
+        void set(int x, int y, float v) {vals[x + y * rows()] = v;}
 
-        void fillKernel(Kernel * k);
+        void fillKernel();
 
     public:
-        StaticKernel(int m, int n, Kernel * k) : Kernel(m, n) {fillKernel(k); cout << typeid(*this).name() << endl;}
+        StaticKernel(int m = 1, int n = 1) : Kernel(m, n) {fillKernel();}
         ~StaticKernel() {delete[] vals;}
 
         virtual void test() {cout << "Basis" << endl;}
@@ -53,31 +52,33 @@ class Gaussian : public StaticKernel
 {
     private:
         float s;
-        float f(float x, float y) 
+        float f(float x, float y)  
             {return 1 / sqrt(2 * M_PI) / s * exp(-(x*x + y*y) / (2*s*s));}
 
     public:
-        void test() override {cout << "Derived" << endl;}
-        Gaussian(int n, float s = 1) : s{s}, StaticKernel(n, n, this) {cout << typeid(*this).name() << endl;}
+        Gaussian(int n, float s = 1) : s{s}, StaticKernel(n, n) 
+        {
+            fillKernel();
+        }
 };
 
-// class Edge : public StaticKernel
-// {
-//     private: 
-//         float f(float x, float y);
+class Edge : public StaticKernel
+{
+    private: 
+        float f(float x, float y);
 
-//     public:
-//         Edge(int n) : StaticKernel(n, n, this) {}
-// };
+    public:
+        Edge(int n = 1) : StaticKernel(n, n) {fillKernel();}
+};
 
-// class Sharpen : public StaticKernel
-// {
-//     private: 
-//         float f(float x, float y);
+class Sharpen : public StaticKernel
+{
+    private: 
+        float f(float x, float y);
 
-//     public:
-//         Sharpen(int n) :  StaticKernel(3, 3, this) {}
-// };
+    public:
+        Sharpen() :  StaticKernel(1, 1) {fillKernel();}
+};
 
 
 // // TODO: fix this 

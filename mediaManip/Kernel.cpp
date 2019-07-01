@@ -3,13 +3,13 @@
 
 using namespace std;
 
-Image Kernel::apply(Image& im, Kernel * ker)
+Image Kernel::apply(Image& im)
 {
     im.quantizeColorSpace( RGBColorspace );
     Image im2(im);
-    for (int i = 1; i < im.rows() - 1; i++)
+    for (int i = m; i < im.rows() - m; i++)
     {
-        for (int j = 1; j < im.columns() - 1; j++)
+        for (int j = n; j < im.columns() - n; j++)
         {
 
         // Color of new pizel
@@ -20,11 +20,10 @@ Image Kernel::apply(Image& im, Kernel * ker)
                 for(int l = 0; l < columns(); l++)
                 {
                     b = im.pixelColor(j + xCoord(l), i + yCoord(k));
-                    a.red(a.red() + b.red() * ker->get(l, k));
-                    a.green(a.green() + b.green() * ker->get(l, k));
-                    a.blue(a.blue() + b.blue() * ker->get(l, k));
+                    a.red(a.red() + b.red() * this->get(l, k));
+                    a.green(a.green() + b.green() * this->get(l, k));
+                    a.blue(a.blue() + b.blue() * this->get(l, k));
                 }
-
         im2.pixelColor(j, i, a);
         }
     }
@@ -32,14 +31,15 @@ Image Kernel::apply(Image& im, Kernel * ker)
 }
 
 
-void StaticKernel::fillKernel(Kernel * k)
+void StaticKernel::fillKernel()
 {
+    cout << typeid(*this).name() << endl;
     float s = 0;
     float a = 0;
     for (int i = 0; i < rows(); i++)
         for (int j = 0; j < columns(); j++)
         {
-            a = k->f(j, i);
+            a = this->f(xCoord(j), yCoord(i));
             s += a;
             set(i, j, a);
         }
@@ -60,23 +60,22 @@ void StaticKernel::print()
     }
 }
 
+float Edge::f(float x, float y)
+{
+    if (x == 0 && y == 0) return rows() * columns() - 1;
+    else return -1;
+}
 
-// float Edge::f(float x, float y)
-// {
-//     if (x == 0 && y == 0) return rows() * columns() - 1;
-//     else return -1;
-// }
-
-// float Sharpen::f(float x, float y)
-// {
-//     if (x == 1 && y == 1) return 5;
-//     if ((x == 0 && y == 0) ||
-//         (x == 0 && y == 2) ||
-//         (x == 2 && y == 0) ||
-//         (x == 2 && y == 2))
-//         return -1;
-//     else return 0;
-// }
+float Sharpen::f(float x, float y)
+{
+    if (x == 1 && y == 1) return 5;
+    if ((x == 0 && y == 0) ||
+        (x == 0 && y == 2) ||
+        (x == 2 && y == 0) ||
+        (x == 2 && y == 2))
+        return -1;
+    else return 0;
+}
 
 // float Smear::f(float x, float y)
 // {
