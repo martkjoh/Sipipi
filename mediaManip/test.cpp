@@ -7,7 +7,7 @@ int main()
 {   
     Image im("blomst.jpeg");
 
-    StaticKernel g;
+    Gaussian g(2);
     g.print();
     im = g.apply(im);
     im.write("hehe.jpeg");
